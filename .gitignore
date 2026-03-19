@@ -20,6 +20,9 @@
 # production
 /build
 
+# Electron / empaquetado (artefactos locales; no subir al remoto)
+/dist/
+
 # misc
 .DS_Store
 *.pem

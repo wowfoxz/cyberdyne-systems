@@ -1,0 +1,886 @@
+/* Reiniciamos márgenes y definimos fuente */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body, html {
+    font-family: "Orbitron", "Courier New", monospace;
+    background-color: #000;
+    color: #00FF00;
+  }
+  /*--------------------------------*/
+  /*-    SCROLLBARS PARA WEBKIT    -*/ 
+  /*--------------------------------*/
+  /* Para navegadores WebKit (Chrome, Edge, Safari) */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #000; /* Fondo negro para el track */
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: #08ff00; /* Color verde para el pulgar */
+    border-radius: 4px;
+    border: 2px solid #000; /* Borde negro para separar */
+  }
+  
+  /* Para Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #08ff00 #000;
+  }
+  
+  /*--------------------------------*/
+  /*-  EFECTOS PARA GRID Y GLITCH  -*/
+  /*--------------------------------*/
+  
+  /* Clase para aplicar la textura de rejilla (grid) */
+  .grid-texture {
+    position: relative;
+  }
+  
+  .grid-texture::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('../textura_filtro.png') repeat;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 9999;
+    animation: moveLines 40s linear infinite;
+  }
+  
+  /*--------------------------------*/
+  /*-  ESTILOS PARA EL BOOTSCREEN  -*/
+  /*--------------------------------*/
+  /* Contenedor principal, ocupa toda la pantalla */
+  .boot-screen {
+    width: 100vw;
+    height: 100vh;
+    background: #000; /* Fondo negro */
+    display: flex;
+  }
+  
+  /* Capa de la textura en rejilla */
+  .grid-texture {
+    position: relative;
+    flex: 1; /* Ocupa todo el espacio */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* La textura real en ::after */
+  .grid-texture::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url('../textura_filtro.png') repeat;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 9999;
+    animation: moveLines 40s linear infinite;
+  }
+  
+  /* Contenedor que centra en columna */
+  .boot-screen__container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative; /* Para superponerse a la textura */
+    z-index: 1;         /* Encima de la rejilla */
+  }
+  
+  /* El logo NO está dentro del glitch-wrapper */
+  .boot-screen__logo {
+    width: 350px;
+    margin-bottom: 20px;
+  }
+  
+  /* Contenedor con glitch: solo el texto y barra de carga */
+  .glitch-wrapper {
+    animation: glitchRGB 4s infinite;
+    will-change: filter;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  /* Resto de estilos (boot-screen__subtitle, boot-screen__progress-bar, etc.) */
+  .boot-screen__subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    /* ... */
+  }
+  
+  .boot-screen__progress-bar {
+    width: 200px;
+    height: 20px;
+    border: 2px solid #00FF00;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  
+  .boot-screen__progress {
+    width: 0%;
+    height: 100%;
+    background-color: #00FF00;
+    animation: loading 3s linear 1;
+  }
+  
+  .boot-screen__loading {
+    font-size: 1.2rem;
+    animation: blink 1s infinite;
+  }
+  
+  
+  /* Animación de la barra: avanza al 50% del tiempo y retrocede al 100% */
+  @keyframes loading {
+    0% {
+      width: 0%;
+    }
+    50% {
+      width: 50%;
+    }
+    100% {
+      width: 100%;
+    }
+  }
+  
+  /* Animación de parpadeo para el texto LOADING... */
+  @keyframes blink {
+    0%, 50% {
+      opacity: 1;
+    }
+    50.01%, 100% {
+      opacity: 0;
+    }
+  }
+  
+  
+  /*------------------------------*/
+  /*-  ESTILOS PARA EL LOGIN     -*/
+  /*------------------------------*/
+  .login-page {
+    width: 100vw;
+    height: 100vh;
+    background-color: #000;
+    display: flex;
+  }
+  
+  /* Rejilla en ::after */
+  .grid-texture {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .grid-texture::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url('../textura_filtro.png') repeat;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 9999;
+    animation: moveLines 40s linear infinite;
+  }
+  
+  /* Contenedor para centrar el contenido del login */
+  .login-container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  /* El logo está afuera del glitch-wrapper */
+  .login-logo {
+    width: 250px;
+    margin-bottom: 20px;
+  }
+  
+  /* Aplica el glitch SOLO al formulario */
+  .glitch-wrapper {
+    animation: glitchRGB 4s infinite;
+    will-change: filter;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  /* Resto de estilos del login... */
+  .login-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* "Tarjeta" de login (transparente para efecto retro) */
+  .login-card {
+    background-color: transparent;
+    text-align: center;
+    padding: 20px;
+    border: none;
+  }
+  
+  
+  /* Contenedor con borde punteado alrededor de los campos */
+  .dotted-container {
+    border: 2px dashed #00ff00;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  /* Cada "campo" de login (input + label) en columna, centrado */
+  .login-field {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 15px 0;
+  }
+  
+  /* Input con fondo verde, texto negro, sin borde extra */
+  .login-input {
+    width: 310px;           /* Ajustar el ancho según diseño */
+    height: 40px;
+    background-color: #00ff00;  /* Fondo verde */
+    color: #000;               /* Texto negro */
+    border: none;
+    outline: none;
+    text-align: center;
+    font-size: 1.5rem;
+    font-family: monospace;
+  }
+  
+  /* Label centrado debajo del input */
+  .login-label {
+    margin-top: 5px;
+    font-size: 1.5rem;
+    text-transform: lowercase; /* Muestra "username" y "password" en minúsculas */
+  }
+  
+  /* Botón con estilo retro, borde punteado */
+  .login-button {
+    background-color: transparent;
+    color: #00ff00;
+    border: 2px dashed #00ff00;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-family: monospace;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .login-button:hover {
+    background-color: #00ff00;
+    color: #000000;
+  }
+  
+  /*-------------------------------*/
+  /*-  ESTILOS PARA EL ESCRITORIO -*/
+  /*-------------------------------*/
+  
+  /* Evita la selección de texto en escritorio, iconos y ventana */
+  .desktop, .icon, .window-header, .minimized-icon {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  .desktop {
+    width: 100vw;
+    height: 100vh;
+    background: #000; /* Fondo base negro */
+    position: relative;
+    overflow: hidden;
+    padding-bottom: 40px; /* Espacio para la barra de tareas */
+  
+  }
+  
+  /* Capa superpuesta con la textura */
+  .desktop::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('../textura_filtro.png') repeat;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 9999;
+    animation: moveLines 40s linear infinite;
+  }
+  
+  /* Contenedor interno que engloba todo el contenido visible y al que se le aplica el glitch */
+  .glitch-wrapper {
+    position: relative;
+    z-index: 1; /* Por debajo de la textura, si se desea */
+    animation: glitchRGB 4s infinite;
+    will-change: filter;
+  }
+  
+  @keyframes moveLines {
+    0% {
+      background-position: 0 0;
+    }
+    12.5% {
+      background-position: 0 10%;
+    }
+    37.5% {
+      background-position: 0 50%;
+    }
+    50% {
+      background-position: 0 60%;
+    }
+    100% {
+      background-position: 0 100%;
+    }
+  }
+  
+  /* Animación del efecto glitch RGB aplicada al wrapper */
+  @keyframes glitchRGB {
+    0% {
+      filter: drop-shadow(2px 0 0 red) drop-shadow(-2px 0 0 cyan);
+    }
+    10% {
+      filter: drop-shadow(-1px 0 0 red) drop-shadow(1px 0 0 cyan);
+    }
+    20% {
+      filter: drop-shadow(1px 0 0 red) drop-shadow(-2px 0 0 cyan);
+    }
+    30% {
+      filter: none;
+    }
+    40% {
+      filter: none;
+    }
+    50% {
+      filter: none;
+    }
+    60% {
+      filter: drop-shadow(2px 0 0 red) drop-shadow(-1px 0 0 cyan);
+    }
+    70% {
+      filter: none;
+    }
+    80% {
+      filter: none;
+    }
+    90% {
+      filter: none;
+    }
+    100% {
+      filter: drop-shadow(1px 0 0 red) drop-shadow(-1px 0 0 cyan);
+    }
+  }
+  
+  /* Contenedor de iconos en el escritorio */
+  .desktop-icons {
+    position: absolute;
+    top: 60px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 20px;
+    /* Limita la altura disponible: 100vh menos el top y el espacio de la taskbar (40px) */
+    max-height: calc(100vh - 100px);
+  }
+  
+  
+  /* Logo en la esquina superior derecha */
+  .skynet-logo {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 150px; 
+    pointer-events: none; /* Evita que interfiera con clics o selección */
+  }
+  
+  .weapon-canvas-wrapper {
+    position: relative  ;         /* Fija el contenedor respecto al viewport */
+    bottom: -55vh;             /* A 5% del fondo de la pantalla */
+    right: -35vw;              /* A 5% del borde derecho */
+    width: 30vw;             /* El 30% del ancho de la ventana */
+    max-width: 500px;        /* No excede 500px */
+    aspect-ratio: 5 / 4;      /* Mantiene la proporción 5:3 */
+    filter: brightness(1.8) contrast(2) hue-rotate(260deg);
+  }
+  
+  
+  /* Estilos para cada icono del escritorio */
+  .icon {
+    width: 80px;
+    text-align: center;
+    cursor: pointer;
+    color: #00FF00; /* Verde retro */
+  }
+  
+  .icon img {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 8px;
+  }
+  
+  /* Estilos existentes para la taskbar */
+  .taskbar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background-color: #00FF00;
+    color: #000;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    overflow: hidden; /* Para evitar que el wrapper se desborde */
+    z-index: 10;
+  }
+  
+  /* Wrapper interno para aplicar el efecto glitch */
+  .glitch-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    animation: glitchRGB 4s infinite;
+    will-change: filter;
+  }
+  
+  
+  /* Resto del CSS de Taskbar (ya existente) */
+  .left-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .start-button {
+    background-color: #00FF00;
+    color: #000;
+    border: 1px solid #000;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 0; 
+  }
+  
+  .taskbar-spacer {
+    flex-grow: 1;
+  }
+  
+  .datetime {
+    font-size: 0.9rem;
+    color: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2;
+  }
+  
+  .separator {
+    width: 1px;
+    height: 60%;
+    background-color: #000;
+    margin: 0 8px;
+  }
+  
+  .taskbar-icon img,
+  .search-button img {
+    width: 16px;   
+    height: 16px;
+    display: block;
+  }
+  
+  .search-button {
+    padding: 4px 6px;
+    border-radius: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .taskbar-icon {
+    padding: 4px 6px;
+    border-radius: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    margin-left: 4px;
+  }
+  
+  /* Iconos de ventanas minimizadas */
+  .minimized-windows {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .minimized-icon {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    background-color: #00FF00;
+    color: #000;
+    border: 1px solid #000;
+    padding: 4px 8px;
+    border-radius: 0;
+    height: 36px;
+    transition: background-color 0.2s;
+  }
+  
+  .minimized-icon img {
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+    filter: brightness(0);
+  }
+  
+  .minimized-icon:hover {
+    background-color: #99cc00;
+  }
+  
+  .minimized-icon span {
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+  
+  /*------------------------------*/
+  /*-  ESTILOS PARA VENTANAS     -*/
+  /*------------------------------*/
+  .app-window {
+    background-color: #000;
+    border: 2px solid #00FF00;
+    box-shadow: 2px 2px 10px rgba(0, 255, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .app-window-header {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #00FF00;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+    user-select: none;
+    border-bottom: 1px solid #00FF00;
+  }
+  
+  .app-window-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+  
+  .app-window-controls button {
+    background: transparent;
+    border: none;
+    color: #00FF00;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-left: 8px;
+  }
+  
+  .app-window-content {
+    flex-grow: 1;
+    position: relative;
+  }
+  
+  
+  .resize-handle {
+    position: absolute;
+    background: transparent;
+    z-index: 10;
+  }
+  
+  /* Handles en cada lado */
+  .resize-handle.top {
+    top: -4px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    cursor: ns-resize;
+  }
+  
+  .resize-handle.bottom {
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    cursor: ns-resize;
+  }
+  
+  .resize-handle.left {
+    left: -4px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: ew-resize;
+  }
+  
+  .resize-handle.right {
+    right: -4px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: ew-resize;
+  }
+  
+  /* Handles en las esquinas */
+  .resize-handle.top-left {
+    top: -4px;
+    left: -4px;
+    width: 8px;
+    height: 8px;
+    cursor: nwse-resize;
+  }
+  
+  .resize-handle.top-right {
+    top: -4px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    cursor: nesw-resize;
+  }
+  
+  .resize-handle.bottom-left {
+    bottom: -4px;
+    left: -4px;
+    width: 8px;
+    height: 8px;
+    cursor: nesw-resize;
+  }
+  
+  .resize-handle.bottom-right {
+    bottom: -4px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    cursor: nwse-resize;
+  }
+  
+  /*-----------------------------------*/
+  /*-      ESTILOS PARA EL  MAPA      -*/
+  /*-----------------------------------*/
+  
+  
+  .leaflet-tile {
+    filter: brightness(0.4) contrast(1.5) hue-rotate(200deg) saturate(1.8);
+  }
+  
+  .leaflet-container {
+    background-color: #000;
+    /* Efecto aura verde alrededor del mapa */
+    box-shadow: 0 0 20px 10px rgba(0, 255, 0, 0.3);
+  }
+  
+  /* Overlay de rejilla (para simular líneas verdes) */
+  .map-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    background-image: url('../rejilla.png');
+    background-size: 100% 100%;
+    background-repeat: repeat;
+    opacity: 0.3;
+    z-index: 999; /* Se fuerza que esté sobre todo */
+  }
+
+  /* Anular posicionamiento fijo en el portal de Next.js */
+  nextjs-portal {
+    left: unset;
+    top: unset;
+  }
+
+  /*-----------------------------------*/
+  /*- ESTILOS Y ANIMACIONES PARA LA ALARMA EN EL PLANO -*/
+  /*-----------------------------------*/
+  
+  /* Onda expansiva */
+  @keyframes waveExpand {
+    0% {
+      transform: scale(0);
+      opacity: 1;
+    }
+    25% {
+      transform: scale(1.5);
+      opacity: 1;
+    }
+    75% {
+      transform: scale(2.5);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(3);
+      opacity: 0;
+    }
+  }
+  
+  .wave {
+    width: 20px;
+    height: 20px;
+    border: 2px solid red;
+    border-radius: 50%;
+    animation: waveExpand 1s ease-out infinite;
+  }
+  
+  /* Parpadeo para texto y badge (alternando rojo y verde) */
+  @keyframes blink {
+    0% { color: red; border-color: red; }
+    50% { color: green; border-color: green; }
+    100% { color: red; border-color: red; }
+  }
+  
+  .alarm-blink {
+    animation: blink 1s infinite;
+  }
+  
+  /* Parpadeo para el texto ALERT */
+  @keyframes alertBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  
+  .alert-text {
+    color: red;
+    font-size: 90px;
+    font-weight: bold;
+    animation: alertBlink 1s infinite;
+  }
+  
+  /*-----------------------------------*/
+  /*- ESTILOS VENTANA DEL PLANO       -*/
+  /*-----------------------------------*/
+  
+  .plano-window {
+    border: 2px solid #00FF00;
+    background-color: #000;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+  }
+  
+  .plano-content {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 1rem;
+  }
+  
+  .plano-image {
+    flex: 1;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .plano-svg-container {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .plano-sections-list {
+    flex: 1;
+    color: #0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+  }
+  
+  .plano-sections-logo {
+    margin-bottom: 1rem;
+  }
+  
+  .plano-sections-logo img {
+    max-width: 200px;
+    height: auto;
+  }
+  
+  .plano-sections-list h2 {
+    margin: 0 0 1rem;
+    text-align: center;
+  }
+  
+  .two-columns {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    width: 100%;
+  }
+  
+  .column {
+    flex: 1;
+  }
+  
+  .two-columns ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    white-space: normal;
+    word-wrap: break-word;
+  }
+  
+  .two-columns li {
+    margin: 0.25rem 0;
+  }
+  
+  .id-badge {
+    display: inline-block;
+    border: 1px solid #0f0;
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-right: 6px;
+    background-color: transparent;
+    white-space: nowrap;
+  }
+  
+  /* Cada <li> se mostrará como una rejilla con 2 columnas */
+  .two-columns li {
+    display: grid;
+    /* La primera columna tendrá 120px de ancho (ajústalo a tu gusto) 
+       y la segunda ocupará el espacio restante. */
+    grid-template-columns: 120px auto;
+    gap: 8px;           /* Espacio horizontal entre las dos columnas */
+    align-items: center;/* Centra verticalmente */
+    margin: 0.25rem 0;
+  }
+  
+  /* Contenedor de los badges */
+  .id-badges {
+    /* Alineamos los badges a la derecha dentro de su columna */
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;           /* Espacio entre cada badge */
+  }
+  
+  /* Contenedor para el texto */
+  .section-name {
+    /* Si quieres que el texto se parta en varias líneas, 
+       asegúrate de no usar white-space: nowrap aquí */
+    white-space: normal;
+  }
+  
