@@ -11,6 +11,11 @@ interface NuclearMapWindowProps {
   onFocus: () => void;
   zIndex: number;
   title?: string;
+  onExplosionCritica?: (payload: {
+    lineaId: string;
+    ciudad: string;
+    plataformaId: number;
+  }) => void;
 }
 
 const NuclearMapContent = dynamic(() => import("./NuclearMapContent"), {
@@ -24,6 +29,7 @@ export default function NuclearMapWindow({
   onFocus,
   zIndex,
   title = "Mapa Nuclear",
+  onExplosionCritica,
 }: NuclearMapWindowProps) {
   // Estado para forzar la actualización del mapa
   const [resizeSignal, setResizeSignal] = useState(0);
@@ -47,7 +53,10 @@ export default function NuclearMapWindow({
       onWindowResize={handleWindowResize}
     >
       <div style={{ width: "100%", height: "100%" }}>
-        <NuclearMapContent resizeSignal={resizeSignal} />
+        <NuclearMapContent
+          resizeSignal={resizeSignal}
+          onExplosionCritica={onExplosionCritica}
+        />
       </div>
     </DraggableResizableWindow>
   );

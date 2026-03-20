@@ -7,7 +7,10 @@ type MinimizableWindow =
   | { type: "notepad"; id: number; title: string }
   | { type: "nuclearMap"; title: string }
   | { type: "threeD"; title: string }
-  | { type: "plano"; title: string };
+  | { type: "plano"; title: string }
+  | { type: "hudConfig"; title: string }
+  | { type: "monitorMetricas"; title: string }
+  | { type: "monitorEventos"; title: string };
 
 interface TaskbarProps {
   minimizedWindows: MinimizableWindow[];
@@ -15,6 +18,10 @@ interface TaskbarProps {
   toggleMinimizeNuclearMap: () => void;
   toggleMinimizeThreeDWindow: () => void;
   toggleMinimizePlanoWindow: () => void;
+  /** Opcionales: usados por el dashboard principal con HUD/monitores. */
+  toggleMinimizeHudConfig?: () => void;
+  toggleMinimizeMonitorMetricas?: () => void;
+  toggleMinimizeMonitorEventos?: () => void;
 }
 
 export default function Taskbar({
@@ -23,6 +30,9 @@ export default function Taskbar({
   toggleMinimizeNuclearMap,
   toggleMinimizeThreeDWindow,
   toggleMinimizePlanoWindow,
+  toggleMinimizeHudConfig = () => {},
+  toggleMinimizeMonitorMetricas = () => {},
+  toggleMinimizeMonitorEventos = () => {},
 }: TaskbarProps) {
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [mounted, setMounted] = useState(false);
@@ -88,6 +98,39 @@ export default function Taskbar({
                     onClick={toggleMinimizePlanoWindow}
                   >
                     <Image src="mi pc.svg" alt={mw.title} width={32} height={32} />
+                    <span>{mw.title}</span>
+                  </div>
+                );
+              } else if (mw.type === "hudConfig") {
+                return (
+                  <div
+                    key={`hudConfig-${idx}`}
+                    className="minimized-icon"
+                    onClick={toggleMinimizeHudConfig}
+                  >
+                    <Image src="mundo.svg" alt={mw.title} width={32} height={32} />
+                    <span>{mw.title}</span>
+                  </div>
+                );
+              } else if (mw.type === "monitorMetricas") {
+                return (
+                  <div
+                    key={`monitorMetricas-${idx}`}
+                    className="minimized-icon"
+                    onClick={toggleMinimizeMonitorMetricas}
+                  >
+                    <Image src="metricas.svg" alt={mw.title} width={32} height={32} />
+                    <span>{mw.title}</span>
+                  </div>
+                );
+              } else if (mw.type === "monitorEventos") {
+                return (
+                  <div
+                    key={`monitorEventos-${idx}`}
+                    className="minimized-icon"
+                    onClick={toggleMinimizeMonitorEventos}
+                  >
+                    <Image src="Buscador-inicio.svg" alt={mw.title} width={32} height={32} />
                     <span>{mw.title}</span>
                   </div>
                 );

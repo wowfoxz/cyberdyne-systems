@@ -13,10 +13,17 @@ import NuclearMapWindow from "@/components/map/NuclearMapWindow";
 import PlanoWindow from "@/components/ventana_plano/PlanoWindow";
 import PlasmaRifleModel from "@/components/ventana_3d/modelos_3d/PlasmaRifleModel";
 import Taskbar from "@/components/dashboard/Taskbar";
+import HudOverlayAlerta from "@/components/dashboard/HudOverlayAlerta";
+import VentanaConfiguracionHud from "@/components/dashboard/VentanaConfiguracionHud";
+import VentanaMonitorMetricas from "@/components/dashboard/VentanaMonitorMetricas";
+import VentanaMonitorEventos from "@/components/dashboard/VentanaMonitorEventos";
+import { HudAlertProvider, useHudAlert } from "@/context/HudAlertProvider";
+import { desbloquearAudioUsuario } from "@/lib/audioContextoUsuario";
 import { Canvas } from "@react-three/fiber";
 
 // Componente Dashboard unificado
 const Dashboard = () => {
+  const { emitirEventoCritico } = useHudAlert();
   // Tipos y estados internos
   interface OpenNotepad {
     id: number;
@@ -43,11 +50,20 @@ const Dashboard = () => {
     zIndex: number;
   }
 
+  interface SimpleWindowState {
+    open: boolean;
+    minimized: boolean;
+    zIndex: number;
+  }
+
   type MinimizableWindow =
     | { type: "notepad"; id: number; title: string }
     | { type: "nuclearMap"; title: string }
     | { type: "threeD"; title: string }
-    | { type: "plano"; title: string };
+    | { type: "plano"; title: string }
+    | { type: "hudConfig"; title: string }
+    | { type: "monitorMetricas"; title: string }
+    | { type: "monitorEventos"; title: string };
 
   const [openNotepads, setOpenNotepads] = useState<OpenNotepad[]>([]);
   const [nuclearMap, setNuclearMap] = useState<NuclearMapState>({
@@ -65,6 +81,23 @@ const Dashboard = () => {
     minimized: false,
     zIndex: 1000,
   });
+  const [hudConfigWindow, setHudConfigWindow] = useState<SimpleWindowState>({
+    open: false,
+    minimized: false,
+    zIndex: 1000,
+  });
+  const [monitorMetricasWindow, setMonitorMetricasWindow] =
+    useState<SimpleWindowState>({
+      open: false,
+      minimized: false,
+      zIndex: 1000,
+    });
+  const [monitorEventosWindow, setMonitorEventosWindow] =
+    useState<SimpleWindowState>({
+      open: false,
+      minimized: false,
+      zIndex: 1000,
+    });
   const [maxZIndex, setMaxZIndex] = useState(1000);
 
   /* Funciones para Notepad */
@@ -210,6 +243,117 @@ const Dashboard = () => {
     setMaxZIndex(newZ);
   };
 
+  /* Ventana configuración HUD */
+  const openHudConfigWindow = () => {
+    if (!hudConfigWindow.open) {
+      const newZ = maxZIndex + 1;
+      setHudConfigWindow({
+        open: true,
+        minimized: false,
+        zIndex: newZ,
+      });
+      setMaxZIndex(newZ);
+    }
+  };
+
+  const closeHudConfigWindow = () => {
+    setHudConfigWindow({
+      open: false,
+      minimized: false,
+      zIndex: 1000,
+    });
+  };
+
+  const toggleMinimizeHudConfigWindow = () => {
+    setHudConfigWindow((prev) => ({
+      ...prev,
+      minimized: !prev.minimized,
+    }));
+  };
+
+  const bringHudConfigWindowToFront = () => {
+    const newZ = maxZIndex + 1;
+    setHudConfigWindow((prev) => ({
+      ...prev,
+      zIndex: newZ,
+    }));
+    setMaxZIndex(newZ);
+  };
+
+  /* Monitor de métricas */
+  const openMonitorMetricasWindow = () => {
+    if (!monitorMetricasWindow.open) {
+      const newZ = maxZIndex + 1;
+      setMonitorMetricasWindow({
+        open: true,
+        minimized: false,
+        zIndex: newZ,
+      });
+      setMaxZIndex(newZ);
+    }
+  };
+
+  const closeMonitorMetricasWindow = () => {
+    setMonitorMetricasWindow({
+      open: false,
+      minimized: false,
+      zIndex: 1000,
+    });
+  };
+
+  const toggleMinimizeMonitorMetricasWindow = () => {
+    setMonitorMetricasWindow((prev) => ({
+      ...prev,
+      minimized: !prev.minimized,
+    }));
+  };
+
+  const bringMonitorMetricasWindowToFront = () => {
+    const newZ = maxZIndex + 1;
+    setMonitorMetricasWindow((prev) => ({
+      ...prev,
+      zIndex: newZ,
+    }));
+    setMaxZIndex(newZ);
+  };
+
+  /* Monitor de eventos */
+  const openMonitorEventosWindow = () => {
+    if (!monitorEventosWindow.open) {
+      const newZ = maxZIndex + 1;
+      setMonitorEventosWindow({
+        open: true,
+        minimized: false,
+        zIndex: newZ,
+      });
+      setMaxZIndex(newZ);
+    }
+  };
+
+  const closeMonitorEventosWindow = () => {
+    setMonitorEventosWindow({
+      open: false,
+      minimized: false,
+      zIndex: 1000,
+    });
+  };
+
+  const toggleMinimizeMonitorEventosWindow = () => {
+    setMonitorEventosWindow((prev) => ({
+      ...prev,
+      minimized: !prev.minimized,
+    }));
+  };
+
+  const bringMonitorEventosWindowToFront = () => {
+    const newZ = maxZIndex + 1;
+    setMonitorEventosWindow((prev) => ({
+      ...prev,
+      zIndex: newZ,
+    }));
+    setMaxZIndex(newZ);
+  };
+
   // Ventanas minimizadas
   const minimizedNotepads = openNotepads.filter((np) => np.minimized);
   const minimizedWindows: MinimizableWindow[] = [
@@ -226,6 +370,15 @@ const Dashboard = () => {
       : []),
     ...(planoWindow.open && planoWindow.minimized
       ? [{ type: "plano" as const, title: "Plano Cyberdyne" }]
+      : []),
+    ...(hudConfigWindow.open && hudConfigWindow.minimized
+      ? [{ type: "hudConfig" as const, title: "Config. HUD" }]
+      : []),
+    ...(monitorMetricasWindow.open && monitorMetricasWindow.minimized
+      ? [{ type: "monitorMetricas" as const, title: "Métricas" }]
+      : []),
+    ...(monitorEventosWindow.open && monitorEventosWindow.minimized
+      ? [{ type: "monitorEventos" as const, title: "Eventos" }]
       : []),
   ];
 
@@ -278,6 +431,36 @@ const Dashboard = () => {
             />
             <span>Plano Cyberdyne</span>
           </div>
+
+          <div className="icon" onDoubleClick={openHudConfigWindow}>
+            <Image
+              src="./mundo.svg"
+              alt="Configuración del HUD"
+              width={64}
+              height={64}
+            />
+            <span>Config. HUD</span>
+          </div>
+
+          <div className="icon" onDoubleClick={openMonitorMetricasWindow}>
+            <Image
+              src="./metricas.svg"
+              alt="Monitor de métricas"
+              width={64}
+              height={64}
+            />
+            <span>Métricas</span>
+          </div>
+
+          <div className="icon" onDoubleClick={openMonitorEventosWindow}>
+            <Image
+              src="./Buscador-inicio.svg"
+              alt="Monitor de eventos"
+              width={64}
+              height={64}
+            />
+            <span>Eventos</span>
+          </div>
         </div>
 
         {/* Logo Skynet arriba a la derecha */}
@@ -307,6 +490,13 @@ const Dashboard = () => {
             onFocus={bringNuclearMapToFront}
             zIndex={nuclearMap.zIndex}
             title="Mapa Nuclear"
+            onExplosionCritica={({ ciudad, lineaId }) => {
+              emitirEventoCritico({
+                tipo: "EXPLOSION_MAPA",
+                mensaje: `Impacto en ${ciudad} (trayectoria ${lineaId})`,
+                origen: "Mapa nuclear",
+              });
+            }}
           />
         )}
         {openNotepads.map((np) => (
@@ -339,9 +529,46 @@ const Dashboard = () => {
             onToggleMinimize={toggleMinimizePlanoWindow}
             onFocus={bringPlanoWindowToFront}
             zIndex={planoWindow.zIndex}
+            onNuevaAlarmaCritica={(codigo) => {
+              emitirEventoCritico({
+                tipo: "ALARMA_PLANO",
+                mensaje: `Sector ${codigo} en alarma`,
+                origen: "Plano Cyberdyne",
+              });
+            }}
+          />
+        )}
+        {hudConfigWindow.open && (
+          <VentanaConfiguracionHud
+            title="CONFIGURACIÓN DEL HUD"
+            onClose={closeHudConfigWindow}
+            minimized={hudConfigWindow.minimized}
+            onToggleMinimize={toggleMinimizeHudConfigWindow}
+            onFocus={bringHudConfigWindowToFront}
+            zIndex={hudConfigWindow.zIndex}
+          />
+        )}
+        {monitorMetricasWindow.open && (
+          <VentanaMonitorMetricas
+            onClose={closeMonitorMetricasWindow}
+            minimized={monitorMetricasWindow.minimized}
+            onToggleMinimize={toggleMinimizeMonitorMetricasWindow}
+            onFocus={bringMonitorMetricasWindowToFront}
+            zIndex={monitorMetricasWindow.zIndex}
+          />
+        )}
+        {monitorEventosWindow.open && (
+          <VentanaMonitorEventos
+            onClose={closeMonitorEventosWindow}
+            minimized={monitorEventosWindow.minimized}
+            onToggleMinimize={toggleMinimizeMonitorEventosWindow}
+            onFocus={bringMonitorEventosWindowToFront}
+            zIndex={monitorEventosWindow.zIndex}
           />
         )}
       </div>
+
+      <HudOverlayAlerta />
 
       <Taskbar
         minimizedWindows={minimizedWindows}
@@ -349,6 +576,9 @@ const Dashboard = () => {
         toggleMinimizeNuclearMap={toggleMinimizeNuclearMap}
         toggleMinimizeThreeDWindow={toggleMinimizeThreeDWindow}
         toggleMinimizePlanoWindow={toggleMinimizePlanoWindow}
+        toggleMinimizeHudConfig={toggleMinimizeHudConfigWindow}
+        toggleMinimizeMonitorMetricas={toggleMinimizeMonitorMetricasWindow}
+        toggleMinimizeMonitorEventos={toggleMinimizeMonitorEventosWindow}
       />
     </div>
   );
@@ -366,9 +596,10 @@ export default function MainPageClient() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     localStorage.setItem("authenticated", "true");
+    await desbloquearAudioUsuario();
     setPhase("dashboard");
   };
 
@@ -434,7 +665,13 @@ export default function MainPageClient() {
     );
   }
 
-  if (phase === "dashboard") return <Dashboard />;
+  if (phase === "dashboard") {
+    return (
+      <HudAlertProvider>
+        <Dashboard />
+      </HudAlertProvider>
+    );
+  }
 
   return null;
 }

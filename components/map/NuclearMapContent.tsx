@@ -34,6 +34,12 @@ const Circle = dynamic(
 
 interface NuclearMapContentProps {
   resizeSignal: number;
+  /** Al generarse una explosión en el mapa (impacto). */
+  onExplosionCritica?: (payload: {
+    lineaId: string;
+    ciudad: string;
+    plataformaId: number;
+  }) => void;
 }
 
 /** Estructura para cada trayectoria (misil). */
@@ -84,6 +90,7 @@ function getCurvedLineAllNorth(
 
 export default function NuclearMapContent({
   resizeSignal,
+  onExplosionCritica,
 }: NuclearMapContentProps) {
   // Configurar iconos por defecto de Leaflet
   delete (L.Icon.Default.prototype as Partial<{ _getIconUrl: () => string }>)
@@ -183,6 +190,11 @@ export default function NuclearMapContent({
           // Buscamos la plataforma destino
           const dest = nuclearPlatforms.find((p) => p.id === line.toId);
           if (dest) {
+            onExplosionCritica?.({
+              lineaId: line.id,
+              ciudad: dest.name,
+              plataformaId: dest.id,
+            });
             const newExplosion: Explosion = {
               id: explosionId,
               position: dest.position,
@@ -194,7 +206,7 @@ export default function NuclearMapContent({
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [progress]);
+  }, [progress, onExplosionCritica]);
 
   // Borramos explosiones antiguas
   useEffect(() => {
@@ -287,8 +299,8 @@ export default function NuclearMapContent({
               center={ex.position}
               radius={radius}
               pathOptions={{
-                color: "red",
-                fillColor: "red",
+                color: "#ff0000",
+                fillColor: "#ff0000",
                 fillOpacity: opacity,
               }}
               opacity={opacity}

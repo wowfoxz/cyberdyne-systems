@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef, useState } from "react";
 import DraggableResizableWindow from "@/components/DraggableResizableWindow";
 import { planoSections } from "@/config/planoSections";
@@ -10,6 +12,8 @@ interface PlanoWindowProps {
   minimized: boolean;
   zIndex: number;
   title: string;
+  /** Se invoca al activarse cada código de alarma en la cadena simulada. */
+  onNuevaAlarmaCritica?: (codigo: string) => void;
 }
 
 const PlanoWindow: React.FC<PlanoWindowProps> = ({
@@ -19,6 +23,7 @@ const PlanoWindow: React.FC<PlanoWindowProps> = ({
   minimized,
   zIndex,
   title,
+  onNuevaAlarmaCritica,
 }) => {
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const [svgContent, setSvgContent] = useState<string>("");
@@ -35,6 +40,9 @@ const PlanoWindow: React.FC<PlanoWindowProps> = ({
       .catch((error) => console.error("Error al cargar el SVG:", error));
   }, []);
   const chainActivatedRef = useRef(false);
+  const onNuevaAlarmaRef = useRef(onNuevaAlarmaCritica);
+  onNuevaAlarmaRef.current = onNuevaAlarmaCritica;
+
   // Seleccionar una cadena aleatoria y activarla progresivamente (cada 2 segundos)
   useEffect(() => {
     if (!chainActivatedRef.current && alarmChains.length > 0) {
@@ -44,7 +52,9 @@ const PlanoWindow: React.FC<PlanoWindowProps> = ({
       setTimeout(() => {
         const activateChain = (i: number) => {
           if (i < randomChain.length) {
-            setActiveAlarms((prev) => [...prev, randomChain[i]]);
+            const codigo = randomChain[i];
+            setActiveAlarms((prev) => [...prev, codigo]);
+            onNuevaAlarmaRef.current?.(codigo);
             setTimeout(() => {
               activateChain(i + 1);
             }, 2000);
