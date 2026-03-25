@@ -32,6 +32,14 @@ const Circle = dynamic(
   { ssr: false }
 );
 
+// Inicializar iconos por defecto de Leaflet (solo una vez por carga del módulo).
+delete (L.Icon.Default.prototype as Partial<{ _getIconUrl: () => string }>)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+
 interface NuclearMapContentProps {
   resizeSignal: number;
   /** Al generarse una explosión en el mapa (impacto). */
@@ -92,15 +100,6 @@ export default function NuclearMapContent({
   resizeSignal,
   onExplosionCritica,
 }: NuclearMapContentProps) {
-  // Configurar iconos por defecto de Leaflet
-  delete (L.Icon.Default.prototype as Partial<{ _getIconUrl: () => string }>)
-    ._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: markerIcon2x,
-    iconUrl: markerIcon,
-    shadowUrl: markerShadow,
-  });
-
   // Icono personalizado: un punto negro
   const nuclearIcon = L.divIcon({
     className: "",

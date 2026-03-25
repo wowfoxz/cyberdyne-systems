@@ -457,7 +457,7 @@
     display: flex;
     align-items: center;
     padding: 0 10px;
-    overflow: hidden; /* Para evitar que el wrapper se desborde */
+    overflow: visible; /* Permitir que overlays de la taskbar se vean */
     z-index: 10;
   }
   
@@ -533,6 +533,34 @@
     display: flex;
     align-items: center;
     margin-left: 4px;
+    position: relative;
+  }
+
+  /* Reset para que los <button> de la taskbar sigan el patrón del HUD */
+  button.taskbar-icon {
+    background: transparent;
+    border: none;
+    appearance: none;
+  }
+  button.taskbar-icon:focus {
+    outline: none;
+  }
+
+  /* Tachado visual cuando el sonido está desactivado */
+  button.taskbar-icon.volumen-silenciado::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 18px;
+    height: 2px;
+    background-color: #000;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    z-index: 2;
+    pointer-events: none;
+  }
+  button.taskbar-icon.volumen-silenciado img {
+    opacity: 0.65;
   }
   
   /* Iconos de ventanas minimizadas */

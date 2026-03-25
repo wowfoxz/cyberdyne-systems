@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DraggableResizableWindow from "@/components/DraggableResizableWindow";
 
 /** Texto por defecto cuando la ventana se abre sin contenido. */
@@ -17,6 +17,7 @@ CONTROLES Y VENTANAS:
 Este documento es editable. Escribe o pega aquí el contenido que necesites.`;
 
 interface NotepadWindowProps {
+  notepadId: number;
   text: string;
   title?: string;
   onClose: () => void;
@@ -27,6 +28,7 @@ interface NotepadWindowProps {
 }
 
 export default function NotepadWindow({
+  notepadId,
   text,
   title = "Notepad",
   onClose,
@@ -35,9 +37,35 @@ export default function NotepadWindow({
   onFocus,
   zIndex,
 }: NotepadWindowProps) {
-  const [content, setContent] = useState(
-    text?.trim() ? text : CONTENIDO_POR_DEFECTO
-  );
+  const clavePersistencia = `cyberdyne_notepad_${notepadId}`;
+
+  const [content, setContent] = useState(text?.trim() ? text : CONTENIDO_POR_DEFECTO);
+
+  // Restaurar desde localStorage una sola vez por ventana.
+  useEffect(() => {
+    try {
+      const guardado = localStorage.getItem(clavePersistencia);
+      if (guardado !== null && guardado.trim().length > 0) {
+        setContent(guardado);
+      }
+    } catch {
+      // Silenciar fallos por modo privado o cuota.
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clavePersistencia]);
+
+  // Autosave: persistimos cambios con debounce para no saturar localStorage.
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      try {
+        localStorage.setItem(clavePersistencia, content);
+      } catch {
+        // Ignorar fallos de persistencia.
+      }
+    }, 450);
+
+    return () => window.clearTimeout(timer);
+  }, [clavePersistencia, content]);
 
   return (
     <DraggableResizableWindow

@@ -80,7 +80,6 @@ export default function DraggableResizableWindow({
     if (!isDragging.current) return;
     const dx = e.clientX - dragStartPos.current.x;
     const dy = e.clientY - dragStartPos.current.y;
-    console.log("onPointerMoveHeader:", e.clientX, e.clientY, "dx:", dx, "dy:", dy);
     setPosition({ x: dragOffset.current.x + dx, y: dragOffset.current.y + dy });
   }, []);
 

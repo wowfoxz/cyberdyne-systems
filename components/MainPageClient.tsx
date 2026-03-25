@@ -354,6 +354,73 @@ const Dashboard = () => {
     setMaxZIndex(newZ);
   };
 
+  /** Etapa B: abrir/restaurar con foco (incluye traer al frente si está minimizado). */
+  const abrirNotepadConFoco = (id: number) => {
+    const cfg = notepadConfigs.find((c) => c.id === id);
+    if (!cfg) return;
+    const abierta = openNotepads.find((np) => np.id === id);
+    if (!abierta) {
+      openNotepad(cfg);
+      return;
+    }
+    if (abierta.minimized) toggleMinimizeNotepad(id);
+    bringNotepadToFront(id);
+  };
+
+  const abrirNuclearMapConFoco = () => {
+    if (!nuclearMap.open) {
+      openNuclearMap();
+      return;
+    }
+    if (nuclearMap.minimized) toggleMinimizeNuclearMap();
+    bringNuclearMapToFront();
+  };
+
+  const abrirThreeDWindowConFoco = () => {
+    if (!threeDWindow.open) {
+      openThreeDWindow();
+      return;
+    }
+    if (threeDWindow.minimized) toggleMinimizeThreeDWindow();
+    bringThreeDWindowToFront();
+  };
+
+  const abrirPlanoWindowConFoco = () => {
+    if (!planoWindow.open) {
+      openPlanoWindow();
+      return;
+    }
+    if (planoWindow.minimized) toggleMinimizePlanoWindow();
+    bringPlanoWindowToFront();
+  };
+
+  const abrirHudConfigConFoco = () => {
+    if (!hudConfigWindow.open) {
+      openHudConfigWindow();
+      return;
+    }
+    if (hudConfigWindow.minimized) toggleMinimizeHudConfigWindow();
+    bringHudConfigWindowToFront();
+  };
+
+  const abrirMonitorMetricasConFoco = () => {
+    if (!monitorMetricasWindow.open) {
+      openMonitorMetricasWindow();
+      return;
+    }
+    if (monitorMetricasWindow.minimized) toggleMinimizeMonitorMetricasWindow();
+    bringMonitorMetricasWindowToFront();
+  };
+
+  const abrirMonitorEventosConFoco = () => {
+    if (!monitorEventosWindow.open) {
+      openMonitorEventosWindow();
+      return;
+    }
+    if (monitorEventosWindow.minimized) toggleMinimizeMonitorEventosWindow();
+    bringMonitorEventosWindowToFront();
+  };
+
   // Ventanas minimizadas
   const minimizedNotepads = openNotepads.filter((np) => np.minimized);
   const minimizedWindows: MinimizableWindow[] = [
@@ -434,7 +501,7 @@ const Dashboard = () => {
 
           <div className="icon" onDoubleClick={openHudConfigWindow}>
             <Image
-              src="./mundo.svg"
+              src="./configure.svg"
               alt="Configuración del HUD"
               width={64}
               height={64}
@@ -502,6 +569,7 @@ const Dashboard = () => {
         {openNotepads.map((np) => (
           <NotepadWindow
             key={np.id}
+            notepadId={np.id}
             text={np.config.description}
             title={np.config.title}
             onClose={() => closeNotepad(np.id)}
@@ -579,6 +647,13 @@ const Dashboard = () => {
         toggleMinimizeHudConfig={toggleMinimizeHudConfigWindow}
         toggleMinimizeMonitorMetricas={toggleMinimizeMonitorMetricasWindow}
         toggleMinimizeMonitorEventos={toggleMinimizeMonitorEventosWindow}
+        onAbrirNotepad={abrirNotepadConFoco}
+        onAbrirNuclearMap={abrirNuclearMapConFoco}
+        onAbrirThreeDWindow={abrirThreeDWindowConFoco}
+        onAbrirPlanoWindow={abrirPlanoWindowConFoco}
+        onAbrirHudConfig={abrirHudConfigConFoco}
+        onAbrirMonitorMetricas={abrirMonitorMetricasConFoco}
+        onAbrirMonitorEventos={abrirMonitorEventosConFoco}
       />
     </div>
   );
