@@ -5,6 +5,10 @@ import DraggableResizableWindow from "@/components/DraggableResizableWindow";
 import { planoSections } from "@/config/planoSections";
 import { alarmChains } from "@/config/alarmChains";
 import Image from "next/image";
+import {
+  detenerAlarmaPlano,
+  reproducirAlarmaPlano,
+} from "@/lib/bandaSonora";
 interface PlanoWindowProps {
   onClose: () => void;
   onToggleMinimize: () => void;
@@ -39,30 +43,29 @@ const PlanoWindow: React.FC<PlanoWindowProps> = ({
       .then((text) => setSvgContent(text))
       .catch((error) => console.error("Error al cargar el SVG:", error));
   }, []);
-  const chainActivatedRef = useRef(false);
   const onNuevaAlarmaRef = useRef(onNuevaAlarmaCritica);
   onNuevaAlarmaRef.current = onNuevaAlarmaCritica;
 
   // Seleccionar una cadena aleatoria y activarla progresivamente (cada 2 segundos)
   useEffect(() => {
-    if (!chainActivatedRef.current && alarmChains.length > 0) {
-      chainActivatedRef.current = true;
-      const randomChain = alarmChains[Math.floor(Math.random() * alarmChains.length)];
-      // Retraso inicial de 3 segundos antes de comenzar la cadena
-      setTimeout(() => {
-        const activateChain = (i: number) => {
-          if (i < randomChain.length) {
-            const codigo = randomChain[i];
-            setActiveAlarms((prev) => [...prev, codigo]);
-            onNuevaAlarmaRef.current?.(codigo);
-            setTimeout(() => {
-              activateChain(i + 1);
-            }, 2000);
-          }
-        };
-        activateChain(0);
-      }, 3000);
-    }
+    if (alarmChains.length === 0) return;
+    let cancelado = false;
+    const esperas: number[] = [];
+    const cadena = alarmChains[Math.floor(Math.random() * alarmChains.length)];
+    const activar = (indice: number) => {
+      if (cancelado || indice >= cadena.length) return;
+      const codigo = cadena[indice];
+      setActiveAlarms((prev) => [...prev, codigo]);
+      onNuevaAlarmaRef.current?.(codigo);
+      if (indice === 0) reproducirAlarmaPlano();
+      esperas.push(window.setTimeout(() => activar(indice + 1), 2000));
+    };
+    esperas.push(window.setTimeout(() => activar(0), 3000));
+    return () => {
+      cancelado = true;
+      esperas.forEach((id) => window.clearTimeout(id));
+      detenerAlarmaPlano();
+    };
   }, []);
   
 

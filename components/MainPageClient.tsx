@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import Image from "next/image";
 import BootScreen from "@/components/boot_bios/BootScreen";
 import {
@@ -17,8 +17,22 @@ import HudOverlayAlerta from "@/components/dashboard/HudOverlayAlerta";
 import VentanaConfiguracionHud from "@/components/dashboard/VentanaConfiguracionHud";
 import VentanaMonitorMetricas from "@/components/dashboard/VentanaMonitorMetricas";
 import VentanaMonitorEventos from "@/components/dashboard/VentanaMonitorEventos";
+import VentanaVistaT800 from "@/components/ventana_video/VentanaVistaT800";
+import CristalTubo from "@/components/CristalTubo";
 import { HudAlertProvider, useHudAlert } from "@/context/HudAlertProvider";
 import { desbloquearAudioUsuario } from "@/lib/audioContextoUsuario";
+import { reproducirPulsacionTecla } from "@/lib/reproducirTecla";
+import {
+  cancelarAlarmaNuclear,
+  detenerAlarmaPlano,
+  detenerSonidoCiborg,
+  detenerTemaIngreso,
+  iniciarAmbiente,
+  iniciarEscanerNuclear,
+  iniciarSonidoCiborg,
+  iniciarTemaIngreso,
+  suscribirApagadoCrt,
+} from "@/lib/bandaSonora";
 import { Canvas } from "@react-three/fiber";
 
 // Componente Dashboard unificado
@@ -63,7 +77,8 @@ const Dashboard = () => {
     | { type: "plano"; title: string }
     | { type: "hudConfig"; title: string }
     | { type: "monitorMetricas"; title: string }
-    | { type: "monitorEventos"; title: string };
+    | { type: "monitorEventos"; title: string }
+    | { type: "vistaT800"; title: string };
 
   const [openNotepads, setOpenNotepads] = useState<OpenNotepad[]>([]);
   const [nuclearMap, setNuclearMap] = useState<NuclearMapState>({
@@ -98,6 +113,11 @@ const Dashboard = () => {
       minimized: false,
       zIndex: 1000,
     });
+  const [vistaT800Window, setVistaT800Window] = useState<SimpleWindowState>({
+    open: false,
+    minimized: false,
+    zIndex: 1000,
+  });
   const [maxZIndex, setMaxZIndex] = useState(1000);
 
   /* Funciones para Notepad */
@@ -142,10 +162,12 @@ const Dashboard = () => {
         zIndex: newZ,
       });
       setMaxZIndex(newZ);
+      iniciarEscanerNuclear();
     }
   };
 
   const closeNuclearMap = () => {
+    cancelarAlarmaNuclear();
     setNuclearMap({
       open: false,
       minimized: false,
@@ -179,10 +201,12 @@ const Dashboard = () => {
         zIndex: newZ,
       });
       setMaxZIndex(newZ);
+      iniciarSonidoCiborg();
     }
   };
 
   const closeThreeDWindow = () => {
+    detenerSonidoCiborg();
     setThreeDWindow({
       open: false,
       minimized: false,
@@ -220,6 +244,7 @@ const Dashboard = () => {
   };
 
   const closePlanoWindow = () => {
+    detenerAlarmaPlano();
     setPlanoWindow({
       open: false,
       minimized: false,
@@ -354,6 +379,43 @@ const Dashboard = () => {
     setMaxZIndex(newZ);
   };
 
+  /* Ventana de video Test vista T800 */
+  const openVistaT800Window = () => {
+    if (!vistaT800Window.open) {
+      const newZ = maxZIndex + 1;
+      setVistaT800Window({
+        open: true,
+        minimized: false,
+        zIndex: newZ,
+      });
+      setMaxZIndex(newZ);
+    }
+  };
+
+  const closeVistaT800Window = () => {
+    setVistaT800Window({
+      open: false,
+      minimized: false,
+      zIndex: 1000,
+    });
+  };
+
+  const toggleMinimizeVistaT800Window = () => {
+    setVistaT800Window((prev) => ({
+      ...prev,
+      minimized: !prev.minimized,
+    }));
+  };
+
+  const bringVistaT800WindowToFront = () => {
+    const newZ = maxZIndex + 1;
+    setVistaT800Window((prev) => ({
+      ...prev,
+      zIndex: newZ,
+    }));
+    setMaxZIndex(newZ);
+  };
+
   /** Etapa B: abrir/restaurar con foco (incluye traer al frente si está minimizado). */
   const abrirNotepadConFoco = (id: number) => {
     const cfg = notepadConfigs.find((c) => c.id === id);
@@ -421,6 +483,15 @@ const Dashboard = () => {
     bringMonitorEventosWindowToFront();
   };
 
+  const abrirVistaT800ConFoco = () => {
+    if (!vistaT800Window.open) {
+      openVistaT800Window();
+      return;
+    }
+    if (vistaT800Window.minimized) toggleMinimizeVistaT800Window();
+    bringVistaT800WindowToFront();
+  };
+
   // Ventanas minimizadas
   const minimizedNotepads = openNotepads.filter((np) => np.minimized);
   const minimizedWindows: MinimizableWindow[] = [
@@ -446,6 +517,9 @@ const Dashboard = () => {
       : []),
     ...(monitorEventosWindow.open && monitorEventosWindow.minimized
       ? [{ type: "monitorEventos" as const, title: "Eventos" }]
+      : []),
+    ...(vistaT800Window.open && vistaT800Window.minimized
+      ? [{ type: "vistaT800" as const, title: "Test vista T800" }]
       : []),
   ];
 
@@ -527,6 +601,16 @@ const Dashboard = () => {
               height={64}
             />
             <span>Eventos</span>
+          </div>
+
+          <div className="icon" onDoubleClick={openVistaT800Window}>
+            <Image
+              src="./vista-t800.svg"
+              alt="Test vista T800"
+              width={64}
+              height={64}
+            />
+            <span>Test vista T800</span>
           </div>
         </div>
 
@@ -634,6 +718,16 @@ const Dashboard = () => {
             zIndex={monitorEventosWindow.zIndex}
           />
         )}
+        {vistaT800Window.open && (
+          <VentanaVistaT800
+            title="Test vista T800"
+            onClose={closeVistaT800Window}
+            minimized={vistaT800Window.minimized}
+            onToggleMinimize={toggleMinimizeVistaT800Window}
+            onFocus={bringVistaT800WindowToFront}
+            zIndex={vistaT800Window.zIndex}
+          />
+        )}
       </div>
 
       <HudOverlayAlerta />
@@ -654,6 +748,8 @@ const Dashboard = () => {
         onAbrirHudConfig={abrirHudConfigConFoco}
         onAbrirMonitorMetricas={abrirMonitorMetricasConFoco}
         onAbrirMonitorEventos={abrirMonitorEventosConFoco}
+        toggleMinimizeVistaT800={toggleMinimizeVistaT800Window}
+        onAbrirVistaT800={abrirVistaT800ConFoco}
       />
     </div>
   );
@@ -665,16 +761,77 @@ export default function MainPageClient() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const targetUsername = "Dr. Miles Bennett Dyson";
+  const [faseCrt, setFaseCrt] = useState<
+    "inactiva" | "sacudida" | "linea" | "punto" | "negro"
+  >("inactiva");
+
+  useEffect(() => {
+    if (phase === "dashboard") {
+      detenerTemaIngreso();
+      return;
+    }
+    iniciarTemaIngreso();
+    const reintentar = () => iniciarTemaIngreso();
+    window.addEventListener("pointerdown", reintentar);
+    window.addEventListener("keydown", reintentar);
+    return () => {
+      window.removeEventListener("pointerdown", reintentar);
+      window.removeEventListener("keydown", reintentar);
+    };
+  }, [phase]);
+
+  useEffect(() => {
+    return suscribirApagadoCrt(() => setFaseCrt("sacudida"));
+  }, []);
+
+  useEffect(() => {
+    if (faseCrt === "sacudida") {
+      const espera = window.setTimeout(() => setFaseCrt("linea"), 480);
+      return () => window.clearTimeout(espera);
+    }
+    if (faseCrt === "linea") {
+      const espera = window.setTimeout(() => setFaseCrt("punto"), 700);
+      return () => window.clearTimeout(espera);
+    }
+    if (faseCrt === "punto") {
+      const espera = window.setTimeout(() => setFaseCrt("negro"), 520);
+      return () => window.clearTimeout(espera);
+    }
+  }, [faseCrt]);
+
+  const envolverPantalla = (contenido: ReactNode) => (
+    <div className="lienzo-viewport">
+      <svg className="lienzo-svg" width="100%" height="100%">
+        <CristalTubo />
+        <g className="grupo-tubo">
+          <foreignObject className="lienzo-fo" x="0" y="0" width="100%" height="100%">
+            <div
+              xmlns="http://www.w3.org/1999/xhtml"
+              className={`lienzo-sistema crt-${faseCrt}`}
+            >
+              {contenido}
+            </div>
+          </foreignObject>
+        </g>
+      </svg>
+      {(faseCrt === "linea" || faseCrt === "punto") && (
+        <div className="crt-fosforo" />
+      )}
+      {faseCrt === "negro" && <div className="crt-negro" />}
+    </div>
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => setPhase("login"), 3000);
     return () => clearTimeout(timer);
   }, []);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    detenerTemaIngreso();
+    iniciarAmbiente();
     localStorage.setItem("authenticated", "true");
-    await desbloquearAudioUsuario();
+    void desbloquearAudioUsuario();
     setPhase("dashboard");
   };
 
@@ -685,13 +842,25 @@ export default function MainPageClient() {
     if (username.length < targetUsername.length) {
       const nextLetter = targetUsername.charAt(username.length);
       setUsername(username + nextLetter);
+      reproducirPulsacionTecla();
     }
   };
 
-  if (phase === "boot") return <BootScreen />;
+  const handlePasswordChange = (valor: string) => {
+    const anteriores = password.length;
+    if (valor.length > anteriores) {
+      const agregados = valor.length - anteriores;
+      for (let i = 0; i < agregados; i++) {
+        reproducirPulsacionTecla();
+      }
+    }
+    setPassword(valor);
+  };
+
+  if (phase === "boot") return envolverPantalla(<BootScreen />);
 
   if (phase === "login") {
-    return (
+    return envolverPantalla(
       <div className="login-page">
         <div className="grid-texture">
           <div className="login-container">
@@ -722,7 +891,7 @@ export default function MainPageClient() {
                           type="password"
                           className="login-input"
                           value={password}
-                          onChange={(e) => setPassword(e.target.value)}
+                          onChange={(e) => handlePasswordChange(e.target.value)}
                         />
                         <label className="login-label">password</label>
                       </div>
@@ -741,7 +910,7 @@ export default function MainPageClient() {
   }
 
   if (phase === "dashboard") {
-    return (
+    return envolverPantalla(
       <HudAlertProvider>
         <Dashboard />
       </HudAlertProvider>

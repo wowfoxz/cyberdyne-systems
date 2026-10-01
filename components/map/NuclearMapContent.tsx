@@ -4,6 +4,11 @@ import { useState, useEffect } from "react";
 import "leaflet/dist/leaflet.css";
 import dynamic from "next/dynamic";
 import { nuclearPlatforms } from "@/config/nuclearPlatforms";
+import {
+  iniciarApagadoCrt,
+  lanzarAlarmaNuclear,
+  reproducirExplosionNuclear,
+} from "@/lib/bandaSonora";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -148,6 +153,10 @@ export default function NuclearMapContent({
         generateRandomMissiles();
         setAnimate(true);
         setProgress(0);
+        lanzarAlarmaNuclear(() => {
+          reproducirExplosionNuclear();
+          iniciarApagadoCrt();
+        });
       }
     };
     document.addEventListener("keydown", handleKeyDown);
@@ -256,13 +265,20 @@ export default function NuclearMapContent({
       <MapContainer
         center={[20, 0] as [number, number]}
         zoom={2}
+        maxZoom={16}
         style={{ height: "100%", width: "100%" }}
       >
         {/* Llamamos a nuestro subcomponente */}
         <InvalidateOnResize signal={resizeSignal} />
+        {/* Carto ya no entrega el mapa sin API key (todas las teselas son la misma marca). */}
         <TileLayer
-          url="https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://carto.com/attributions">CartoDB Dark Matter</a>'
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+          attribution='Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
+          maxZoom={16}
+        />
+        <TileLayer
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}"
+          maxZoom={16}
         />
 
         {/* Marcadores */}

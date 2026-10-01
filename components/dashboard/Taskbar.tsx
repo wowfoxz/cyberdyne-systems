@@ -16,7 +16,8 @@ type MinimizableWindow =
   | { type: "plano"; title: string }
   | { type: "hudConfig"; title: string }
   | { type: "monitorMetricas"; title: string }
-  | { type: "monitorEventos"; title: string };
+  | { type: "monitorEventos"; title: string }
+  | { type: "vistaT800"; title: string };
 
 interface TaskbarProps {
   minimizedWindows: MinimizableWindow[];
@@ -28,6 +29,7 @@ interface TaskbarProps {
   toggleMinimizeHudConfig?: () => void;
   toggleMinimizeMonitorMetricas?: () => void;
   toggleMinimizeMonitorEventos?: () => void;
+  toggleMinimizeVistaT800?: () => void;
 
   /** Etapa B: callbacks opcionales para abrir/restaurar ventanas con foco. */
   onAbrirNotepad?: (id: number) => void;
@@ -37,6 +39,7 @@ interface TaskbarProps {
   onAbrirHudConfig?: () => void;
   onAbrirMonitorMetricas?: () => void;
   onAbrirMonitorEventos?: () => void;
+  onAbrirVistaT800?: () => void;
 }
 
 export default function Taskbar({
@@ -48,6 +51,7 @@ export default function Taskbar({
   toggleMinimizeHudConfig = () => {},
   toggleMinimizeMonitorMetricas = () => {},
   toggleMinimizeMonitorEventos = () => {},
+  toggleMinimizeVistaT800 = () => {},
   onAbrirNotepad,
   onAbrirNuclearMap,
   onAbrirThreeDWindow,
@@ -55,6 +59,7 @@ export default function Taskbar({
   onAbrirHudConfig,
   onAbrirMonitorMetricas,
   onAbrirMonitorEventos,
+  onAbrirVistaT800,
 }: TaskbarProps) {
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [mounted, setMounted] = useState(false);
@@ -326,6 +331,23 @@ export default function Taskbar({
                     }}
                   >
                     <Image src="Buscador-inicio.svg" alt={mw.title} width={32} height={32} />
+                    <span>{mw.title}</span>
+                  </div>
+                );
+              } else if (mw.type === "vistaT800") {
+                return (
+                  <div
+                    key={`vistaT800-${idx}`}
+                    className="minimized-icon"
+                    onClick={() => {
+                      if (onAbrirVistaT800) {
+                        onAbrirVistaT800();
+                        return;
+                      }
+                      toggleMinimizeVistaT800();
+                    }}
+                  >
+                    <Image src="vista-t800.svg" alt={mw.title} width={32} height={32} />
                     <span>{mw.title}</span>
                   </div>
                 );
@@ -610,6 +632,30 @@ export default function Taskbar({
                 }}
               >
                 EVENTOS
+              </button>
+
+              <button
+                type="button"
+                style={{
+                  background: "transparent",
+                  color: "var(--hud-primary)",
+                  border: "1px dashed var(--hud-primary)",
+                  padding: "6px 10px",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  textTransform: "uppercase",
+                  fontSize: 12,
+                }}
+                onClick={() => {
+                  if (onAbrirVistaT800) {
+                    onAbrirVistaT800();
+                    cerrarInicio();
+                    return;
+                  }
+                  ejecutarEscaneoSimulado("ABRIR TEST VISTA T800");
+                }}
+              >
+                TEST VISTA T800
               </button>
             </div>
           </div>
