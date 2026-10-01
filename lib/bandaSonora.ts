@@ -1,9 +1,9 @@
 const SRC = {
   tema: "./audio/tema-t2.mp3",
-  estatica: "./audio/estatica.wav",
-  bateria: "./audio/bateria.wav",
-  alarmaPlano: "./audio/alarma-plano.wav",
-  ciborg: "./audio/ciborg.wav",
+  estatica: "./audio/estatica.mp3",
+  bateria: "./audio/bateria.mp3",
+  alarmaPlano: "./audio/alarma-plano.mp3",
+  ciborg: "./audio/ciborg.mp3",
   escaner: "./audio/escaner.mp3",
   alarmaNuclear: "./audio/alarma-nuclear.mp3",
   explosion: "./audio/explosion.mp3",
@@ -23,6 +23,8 @@ let secuenciaNuclear: "espera" | "alarma" | "explosion" = "espera";
 let alarmaNuclearCancelada = false;
 const oyentesCrt: OyenteCrt[] = [];
 
+let silencioActivo = false;
+
 function crear(src: string, loop: boolean, volumen: number): HTMLAudioElement {
   const audio = new Audio(src);
   audio.loop = loop;
@@ -38,6 +40,7 @@ function parar(audio: HTMLAudioElement | null): null {
 }
 
 function reproducir(audio: HTMLAudioElement) {
+  if (silencioActivo) return;
   void audio.play().catch(() => {
     // El navegador puede bloquear el audio hasta el primer gesto.
   });
@@ -159,4 +162,18 @@ export function iniciarApagadoCrt() {
   alarmaNuclearCancelada = true;
   alarmaNuclear = parar(alarmaNuclear);
   oyentesCrt.forEach((oyente) => oyente());
+}
+
+export function silenciarTodos(): void {
+  silencioActivo = true;
+  [tema, estatica, bateria, alarmaPlano, ciborg, escaner, alarmaNuclear, explosion].forEach((audio) => {
+    if (audio && !audio.paused) { audio.pause(); audio.volume = 0; }
+  });
+}
+
+export function restaurarSonido(): void {
+  silencioActivo = false;
+  [tema, estatica, bateria, alarmaPlano, ciborg, escaner, alarmaNuclear, explosion].forEach((audio) => {
+    if (audio) audio.volume = audio === bateria ? 0.4 : 1;
+  });
 }

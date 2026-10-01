@@ -9,21 +9,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "electron .",
-    "electron:build": "electron-builder"
+    "electron:build": "npm run build && electron-builder --win nsis portable --x64"
   },
   "dependencies": {
     "@react-three/drei": "^10.0.4",
     "@react-three/fiber": "^9.1.0",
     "leaflet": "^1.9.4",
-    "maplibre-gl": "^5.2.0",
     "next": "15.2.1",
-    "next-transpile-modules": "^10.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-leaflet": "^5.0.0",
-    "react-map-gl": "^8.0.1",
-    "three": "^0.174.0",
-    "three-stdlib": "^2.35.14"
+    "three": "^0.174.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -41,8 +37,26 @@
   },
   "build": {
     "appId": "com.cyberdyne.systems",
+    "productName": "Cyberdyne Systems",
+    "icon": "build/icon.ico",
     "win": {
-      "target": "nsis"
+      "icon": "build/icon.ico",
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "artifactName": "CyberdyneSystems-instalador.${ext}"
+    },
+    "portable": {
+      "artifactName": "CyberdyneSystems-portable.${ext}"
     },
     "files": [
       "out/**/*",

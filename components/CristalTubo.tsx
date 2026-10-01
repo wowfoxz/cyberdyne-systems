@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
-import { crearMapaDelTubo, muestraDelTubo } from "@/lib/distorsionTubo";
+import { contornoDelVidrio, crearMapaDelTubo, muestraDelTubo } from "@/lib/distorsionTubo";
 
 /**
  * Vidrio del tubo: deforma lo que se dibuja y manda el clic
@@ -19,6 +19,7 @@ export default function CristalTubo() {
       const sistema = svg?.querySelector(".lienzo-sistema");
       const grupo = svg?.querySelector(".grupo-tubo");
       if (
+        !(svg instanceof SVGSVGElement) ||
         !(sistema instanceof HTMLElement) ||
         !(grupo instanceof SVGGElement) ||
         !filtroRef.current ||
@@ -27,14 +28,27 @@ export default function CristalTubo() {
       ) {
         return;
       }
+      const caja = svg.getBoundingClientRect();
+      svg.setAttribute("width", String(Math.max(1, Math.round(caja.width))));
+      svg.setAttribute("height", String(Math.max(1, Math.round(caja.height))));
       const rect = sistema.getBoundingClientRect();
       const ancho = Math.max(1, Math.round(rect.width || window.innerWidth));
       const alto = Math.max(1, Math.round(rect.height || window.innerHeight));
       const mapa = crearMapaDelTubo(ancho, alto);
       if (!mapa.url) return;
       imagenRef.current.setAttribute("href", mapa.url);
+      imagenRef.current.setAttribute("width", String(ancho));
+      imagenRef.current.setAttribute("height", String(alto));
       mapaRef.current.setAttribute("scale", String(mapa.escala));
       grupo.setAttribute("filter", "url(#tubo-crt)");
+      const interior = contornoDelVidrio(ancho, alto);
+      const recorte = `polygon(${interior
+        .map((punto) => `${punto.x.toFixed(1)}px ${punto.y.toFixed(1)}px`)
+        .join(", ")})`;
+      const viewport = svg.closest(".lienzo-viewport");
+      if (viewport instanceof HTMLElement) {
+        viewport.style.setProperty("--recorte-vidrio", recorte);
+      }
     };
     const alRedimensionar = () => {
       cancelAnimationFrame(marco);
@@ -108,6 +122,39 @@ export default function CristalTubo() {
       destino.dispatchEvent(copia);
     };
 
+    const elementoEnContenido = (x: number, y: number): Element | null => {
+      const svg = filtroRef.current?.ownerSVGElement;
+      if (!(svg instanceof SVGSVGElement)) return document.elementFromPoint(x, y);
+      const recorte = svg.style.clipPath;
+      svg.style.clipPath = "none";
+      const hallado = document.elementFromPoint(x, y);
+      svg.style.clipPath = recorte;
+      return hallado;
+    };
+
+    const cursorDelContenido = (evento: PointerEvent) => {
+      const sistema = filtroRef.current?.ownerSVGElement?.querySelector(
+        ".lienzo-sistema"
+      );
+      if (!(sistema instanceof HTMLElement)) return;
+      const rect = sistema.getBoundingClientRect();
+      const localX = evento.clientX - rect.left;
+      const localY = evento.clientY - rect.top;
+      if (
+        localX < 0 ||
+        localY < 0 ||
+        localX > rect.width ||
+        localY > rect.height
+      ) {
+        document.documentElement.style.cursor = "";
+        return;
+      }
+      const muestra = muestraDelTubo(localX, localY, rect.width, rect.height);
+      const real = elementoEnContenido(muestra.x + rect.left, muestra.y + rect.top);
+      const cursor = real ? getComputedStyle(real).cursor : "auto";
+      document.documentElement.style.cursor = cursor === "auto" ? "" : cursor;
+    };
+
     const corregir = (evento: Event) => {
       if (vistos.has(evento) || !(evento instanceof MouseEvent)) return;
       if (
@@ -142,10 +189,7 @@ export default function CristalTubo() {
       const visual = document.elementFromPoint(evento.clientX, evento.clientY);
       const real = afuera
         ? null
-        : document.elementFromPoint(
-            muestra.x + rect.left,
-            muestra.y + rect.top
-          );
+        : elementoEnContenido(muestra.x + rect.left, muestra.y + rect.top);
       if (!afuera && (!real || real === visual)) return;
 
       evento.stopImmediatePropagation();
@@ -200,11 +244,14 @@ export default function CristalTubo() {
     for (const tipo of tipos) {
       document.addEventListener(tipo, corregir, true);
     }
+    document.addEventListener("pointermove", cursorDelContenido, true);
     return () => {
       if (clicNativo !== null) window.clearTimeout(clicNativo);
+      document.documentElement.style.cursor = "";
       for (const tipo of tipos) {
         document.removeEventListener(tipo, corregir, true);
       }
+      document.removeEventListener("pointermove", cursorDelContenido, true);
     };
   }, []);
 

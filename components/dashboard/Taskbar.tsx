@@ -8,6 +8,7 @@ import { notepadConfigs } from "@/config/notepadConfig";
 import { nuclearPlatforms } from "@/config/nuclearPlatforms";
 import { planoSections } from "@/config/planoSections";
 import { reproducirTonoAlertaCritica } from "@/lib/reproducirAlertaSonora";
+import { silenciarTodos, restaurarSonido } from "@/lib/bandaSonora";
 
 type MinimizableWindow =
   | { type: "notepad"; id: number; title: string }
@@ -390,6 +391,9 @@ export default function Taskbar({
             if (nuevoSonido) {
               // Señal corta estilo T-800.
               void reproducirTonoAlertaCritica(740, 160);
+              restaurarSonido();
+            } else {
+              silenciarTodos();
             }
           }}
         >

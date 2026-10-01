@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cyberdyne Systems</title>
+    <link rel="icon" href="./cyberdyne.png" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --verde: #5dff6a;
+        --fondo: #070807;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", sans-serif;
+        color: #d7ffd8;
+        background:
+          radial-gradient(ellipse at 50% 0%, #123018 0%, transparent 46%),
+          var(--fondo);
+      }
+      main {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 48px 20px 64px;
+        text-align: center;
+      }
+      .marcas {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 28px;
+        margin-bottom: 12px;
+      }
+      .marcas img { height: 88px; width: auto; }
+      h1 {
+        margin: 8px 0 6px;
+        letter-spacing: 0.18em;
+        font-size: 1.35rem;
+        color: var(--verde);
+      }
+      p { color: #9fb8a2; line-height: 1.5; }
+      .acciones {
+        display: grid;
+        gap: 14px;
+        margin-top: 32px;
+      }
+      a.boton {
+        display: block;
+        padding: 16px 18px;
+        text-decoration: none;
+        color: #041408;
+        background: var(--verde);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+      a.boton span {
+        display: block;
+        margin-top: 4px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        color: #083012;
+      }
+      a.secundario { background: transparent; color: var(--verde); border: 1px solid var(--verde); }
+      a.secundario span { color: #9fb8a2; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="marcas">
+        <img src="./cyberdyne.png" alt="Cyberdyne" />
+        <img src="./skynet.png" alt="Skynet" />
+      </div>
+      <h1>CYBERDYNE SYSTEMS</h1>
+      <p>Escritorio Skynet. Se puede abrir en el navegador o descargar para Windows.</p>
+      <div class="acciones">
+        <a class="boton" href="./app/">
+          VER EN EL NAVEGADOR
+          <span>Abre el escritorio sin instalar nada</span>
+        </a>
+        <a class="boton secundario" href="./descargas/CyberdyneSystems-portable.exe">
+          DESCARGAR PORTABLE
+          <span>Un ejecutable. No pide instalación</span>
+        </a>
+        <a class="boton secundario" href="./descargas/CyberdyneSystems-instalador.exe">
+          DESCARGAR INSTALABLE
+          <span>Instalador para Windows</span>
+        </a>
+      </div>
+    </main>
+  </body>
+</html>

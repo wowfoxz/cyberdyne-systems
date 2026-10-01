@@ -25,6 +25,29 @@ export function muestraDelTubo(
   };
 }
 
+/**
+ * Dónde se ve en el vidrio un punto del contenido.
+ * Es el camino inverso de muestraDelTubo.
+ */
+export function visualDelTubo(
+  origenX: number,
+  origenY: number,
+  ancho: number,
+  alto: number
+): { x: number; y: number } {
+  let x = origenX;
+  let y = origenY;
+  for (let paso = 0; paso < 12; paso += 1) {
+    const muestra = muestraDelTubo(x, y, ancho, alto);
+    const dx = origenX - muestra.x;
+    const dy = origenY - muestra.y;
+    if (dx * dx + dy * dy < 0.25) break;
+    x += dx * 0.65;
+    y += dy * 0.65;
+  }
+  return { x, y };
+}
+
 function limitarCanal(valor: number): number {
   return Math.max(0, Math.min(255, Math.round(valor)));
 }
@@ -33,12 +56,57 @@ function limitarCanal(valor: number): number {
  * Mapa rojo/verde que el filtro SVG usa para empujar cada pixel.
  * El rojo mueve en horizontal y el verde en vertical.
  */
+/**
+ * Borde del vidrio. El plástico sigue este arco: las esquinas
+ * quedan más adentro que el centro, igual que el contenido.
+ */
+export function contornoDelVidrio(
+  ancho: number,
+  alto: number,
+  pasos = 72
+): { x: number; y: number }[] {
+  const centroX = ancho / 2;
+  const centroY = alto / 2;
+  const alcance = Math.hypot(ancho, alto);
+  const puntos: { x: number; y: number }[] = [];
+
+  for (let paso = 0; paso < pasos; paso += 1) {
+    const angulo = (paso / pasos) * Math.PI * 2;
+    const direccionX = Math.cos(angulo);
+    const direccionY = Math.sin(angulo);
+    let menor = 0;
+    let mayor = alcance;
+    for (let intento = 0; intento < 18; intento += 1) {
+      const radio = (menor + mayor) / 2;
+      const x = centroX + direccionX * radio;
+      const y = centroY + direccionY * radio;
+      const muestra = muestraDelTubo(x, y, ancho, alto);
+      const adentro =
+        x >= 0 &&
+        y >= 0 &&
+        x <= ancho &&
+        y <= alto &&
+        muestra.x >= 1 &&
+        muestra.y >= 1 &&
+        muestra.x <= ancho - 1 &&
+        muestra.y <= alto - 1;
+      if (adentro) menor = radio;
+      else mayor = radio;
+    }
+    puntos.push({
+      x: centroX + direccionX * menor,
+      y: centroY + direccionY * menor,
+    });
+  }
+  return puntos;
+}
+
 export function crearMapaDelTubo(
   anchoVista: number,
   altoVista: number
 ): { url: string; escala: number } {
-  const columnas = 320;
-  const filas = 180;
+  const columnas = Math.max(2, Math.round(anchoVista));
+  const filas = Math.max(2, Math.round(altoVista));
   const lienzo = document.createElement("canvas");
   lienzo.width = columnas;
   lienzo.height = filas;
@@ -72,5 +140,26 @@ export function crearMapaDelTubo(
     pixeles[base + 3] = 255;
   }
   contexto.putImageData(imagen, 0, 0);
+  suavizarMapa(pixeles, columnas, filas);
+  contexto.putImageData(imagen, 0, 0);
   return { url: lienzo.toDataURL("image/png"), escala };
+}
+
+/** Difumina un poco el mapa para que las líneas no salgan en escalera. */
+function suavizarMapa(pixeles: Uint8ClampedArray, columnas: number, filas: number): void {
+  const copia = new Uint8ClampedArray(pixeles);
+  for (let fila = 1; fila < filas - 1; fila += 1) {
+    for (let columna = 1; columna < columnas - 1; columna += 1) {
+      const indice = (fila * columnas + columna) * 4;
+      for (let canal = 0; canal < 2; canal += 1) {
+        let suma = 0;
+        for (let dy = -1; dy <= 1; dy += 1) {
+          for (let dx = -1; dx <= 1; dx += 1) {
+            suma += copia[((fila + dy) * columnas + (columna + dx)) * 4 + canal];
+          }
+        }
+        pixeles[indice + canal] = Math.round(suma / 9);
+      }
+    }
+  }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, type HTMLAttributes, type ReactNode } from "react";
 import Image from "next/image";
 import BootScreen from "@/components/boot_bios/BootScreen";
 import {
@@ -19,6 +19,7 @@ import VentanaMonitorMetricas from "@/components/dashboard/VentanaMonitorMetrica
 import VentanaMonitorEventos from "@/components/dashboard/VentanaMonitorEventos";
 import VentanaVistaT800 from "@/components/ventana_video/VentanaVistaT800";
 import CristalTubo from "@/components/CristalTubo";
+import ReflejoMarco from "@/components/ReflejoMarco";
 import { HudAlertProvider, useHudAlert } from "@/context/HudAlertProvider";
 import { desbloquearAudioUsuario } from "@/lib/audioContextoUsuario";
 import { reproducirPulsacionTecla } from "@/lib/reproducirTecla";
@@ -543,16 +544,6 @@ const Dashboard = () => {
             </div>
           ))}
 
-          <div className="icon" onClick={openThreeDWindow}>
-            <Image
-              src="./papelera.svg"
-              alt="Animación 3D"
-              width={64}
-              height={64}
-            />
-            <span>Animación 3D</span>
-          </div>
-
           <div className="icon" onDoubleClick={openNuclearMap}>
             <Image
               src="./explorer.svg"
@@ -583,14 +574,14 @@ const Dashboard = () => {
             <span>Config. HUD</span>
           </div>
 
-          <div className="icon" onDoubleClick={openMonitorMetricasWindow}>
+          <div className="icon" onClick={openThreeDWindow}>
             <Image
-              src="./metricas.svg"
-              alt="Monitor de métricas"
+              src="./papelera.svg"
+              alt="Animación 3D"
               width={64}
               height={64}
             />
-            <span>Métricas</span>
+            <span>Animación 3D</span>
           </div>
 
           <div className="icon" onDoubleClick={openMonitorEventosWindow}>
@@ -601,6 +592,16 @@ const Dashboard = () => {
               height={64}
             />
             <span>Eventos</span>
+          </div>
+
+          <div className="icon" onDoubleClick={openMonitorMetricasWindow}>
+            <Image
+              src="./metricas.svg"
+              alt="Monitor de métricas"
+              width={64}
+              height={64}
+            />
+            <span>Métricas</span>
           </div>
 
           <div className="icon" onDoubleClick={openVistaT800Window}>
@@ -801,19 +802,22 @@ export default function MainPageClient() {
 
   const envolverPantalla = (contenido: ReactNode) => (
     <div className="lienzo-viewport">
-      <svg className="lienzo-svg" width="100%" height="100%">
+      <svg className="lienzo-svg">
         <CristalTubo />
         <g className="grupo-tubo">
           <foreignObject className="lienzo-fo" x="0" y="0" width="100%" height="100%">
             <div
-              xmlns="http://www.w3.org/1999/xhtml"
-              className={`lienzo-sistema crt-${faseCrt}`}
+              {...({
+                xmlns: "http://www.w3.org/1999/xhtml",
+                className: `lienzo-sistema crt-${faseCrt}`,
+              } as HTMLAttributes<HTMLDivElement>)}
             >
               {contenido}
             </div>
           </foreignObject>
         </g>
       </svg>
+      <ReflejoMarco />
       {(faseCrt === "linea" || faseCrt === "punto") && (
         <div className="crt-fosforo" />
       )}

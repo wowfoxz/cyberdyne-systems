@@ -1267,25 +1267,33 @@
   cursor: pointer;
 }
 
-/* Tubo CRT: el contenido se comba (filtro #tubo-crt) y el vidrio tapa las esquinas. */
+/* Marco del tubo: carcasa, vidrio hundido y reflejo del fósforo. */
 .lienzo-viewport {
   position: relative;
   min-height: 100vh;
-  background: #000;
   overflow: hidden;
-  border-radius: 2.4vw / 5vh;
+  border-radius: 48px;
+  background:
+    linear-gradient(165deg, #8a8a8a 0%, #5a5a5a 3%, #3a3a3a 9%, #222 22%, #161616 55%, #101010 100%);
   box-shadow:
-    inset 0 0 0 3px rgba(90, 255, 120, 0.22),
-    inset 0 0 70px 28px rgba(0, 0, 0, 0.55);
+    inset 0 2px 0 rgba(255, 255, 255, 0.55),
+    inset 0 22px 36px rgba(255, 255, 255, 0.07),
+    inset 0 -36px 48px rgba(0, 0, 0, 0.72),
+    inset 36px 0 48px rgba(0, 0, 0, 0.38),
+    inset -36px 0 48px rgba(0, 0, 0, 0.45);
 }
 
 .lienzo-svg {
   position: absolute;
-  inset: 0;
+  top: 24px;
+  left: 36px;
   display: block;
-  width: 100%;
-  height: 100%;
+  width: calc(100% - 72px);
+  height: calc(100% - 50px);
   overflow: hidden;
+  border-radius: 0;
+  clip-path: var(--recorte-vidrio, inset(0 round 36px));
+  box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.5);
 }
 
 .lienzo-fo {
@@ -1294,23 +1302,65 @@
   overflow: visible;
 }
 
+/* Brillo del cristal: luz de arriba y un reflejo del tubo. */
 .lienzo-viewport::before {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: 24px 36px 26px;
   z-index: 90000;
+  border-radius: 0;
+  clip-path: var(--recorte-vidrio, inset(0 round 40px));
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 62% 16% at 50% 0%, rgba(255, 255, 255, 0.28), transparent 72%),
+    linear-gradient(
+      108deg,
+      transparent 58%,
+      rgba(255, 255, 255, 0.04) 70%,
+      rgba(255, 255, 255, 0.16) 79%,
+      rgba(255, 255, 255, 0.04) 88%,
+      transparent 96%
+    ),
+    radial-gradient(ellipse at center, transparent 64%, rgba(0, 0, 0, 0.42) 100%);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.14);
+}
+
+/* Brillo fijo del plástico. El color de la pantalla lo pinta el canvas aparte. */
+.lienzo-viewport::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   border-radius: inherit;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 70% 24% at 50% 0%, rgba(210, 255, 220, 0.14), transparent 70%),
-    radial-gradient(ellipse at center, transparent 68%, rgba(0, 0, 0, 0.55) 100%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 7%),
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255, 255, 255, 0.08), transparent 70%);
+}
+
+.reflejo-marco {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .lienzo-sistema {
   position: relative;
-  height: 100vh;
-  min-height: 100vh;
+  height: 100%;
+  min-height: 100%;
   transform-origin: center center;
+}
+
+/* El escritorio ocupa el vidrio, para que la barra quede dentro del marco. */
+.lienzo-sistema .boot-screen,
+.lienzo-sistema .login-page,
+.lienzo-sistema .desktop {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
 }
 
 .lienzo-sistema::after {
